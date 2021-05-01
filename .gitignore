@@ -183,3 +183,17 @@ octave-workspace
 *.fif
 *.mat
 ds
+
+# outputs
+outputs
+reports
+reports.txt
+plots
+*.png
+*.jpg
+*.fig
+*.tgz
+*.tar.gz2
+*.bz2
+*.rar
+*.zip

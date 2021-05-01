@@ -4,7 +4,7 @@
 # In[1]:
 
 
-get_ipython().run_line_magic('config', 'Completer.use_jedi = False')
+# get_ipython().run_line_magic('config', 'Completer.use_jedi = False')
 
 
 # In[16]:
@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import mne
 import json
+import sys
 
 # import scipy.io as sio
 # from scipy import signal
@@ -79,7 +80,14 @@ def create_elc_file(task):
 
 
 
-def create_tasks_df(df):
+def create_tasks_df(ds_path=None):
+    if ds_path is None:
+        with open('config.json') as f:
+            config = json.load(f)
+        BASE_PATH = config['BASE_PATH']
+        ds_path = os.path.join(BASE_PATH, 'ds003490-download')
+    
+    df = pd.read_csv(os.path.join(ds_path, 'participants.tsv'), sep="\t")
     tasks = []
 
     for _, participant in df.iterrows():
@@ -95,7 +103,7 @@ def create_tasks_df(df):
             participant_tasks['pd_drug_type'] = pd_drug_type
             participant_tasks['isMale'] = participant['sex'] == 'Male'
             participant_tasks['age'] = participant['age']
-            participant_tasks['dir'] = os.path.join(DS_PATH, participant['participant_id'], f'ses-{sess:02}', 'eeg',)
+            participant_tasks['dir'] = os.path.join(ds_path, participant['participant_id'], f'ses-{sess:02}', 'eeg',)
             participant_tasks['file'] = f'{participant["participant_id"]}_ses-{sess:02}_eeg_{participant["participant_id"]}_ses-{sess:02}_task-Rest_eeg.mat'
             participant_tasks['file_formatter'] = f'{participant["participant_id"]}_ses-{sess:02}_task-Rest_{{}}'
             participant_tasks['path'] = os.path.join(
@@ -141,11 +149,10 @@ def _test_tasks_df(tasks_df, i=0):
 
 def check_completed(task, event=None) -> bool:
     json_path = os.path.join(task['dir'], task['file_formatter'].format('completed.json'))
+    completed = {}
     if os.path.exists(json_path):
-        with open() as f:
+        with open(json_path) as f:
             completed = json.load(f)
-    else:
-        completed = {}
     
     if event is None:
         return completed.get('total', False)
@@ -155,19 +162,18 @@ def check_completed(task, event=None) -> bool:
 
 def update_completed(task, event=None) -> bool:
     json_path = os.path.join(task['dir'], task['file_formatter'].format('completed.json'))
+    completed = {}
     if os.path.exists(json_path):
-        with open() as f:
+        with open(json_path) as f:
             completed = json.load(f)
-    else:
-        completed = {}
 
     if event is None:
         completed['total'] = True
     else:
         completed[event] = True
-
-    with open(os.path.join(json_path), 'w') as f:
-        json.dump(f, completed)
+        
+    with open(json_path, 'w') as f:
+        json.dump(completed, f)
 
 
 # In[18]:
@@ -196,17 +202,17 @@ def analyse_erps(erps: dict, task=None):
         for chx, chxname in enumerate(erp_df):
             chy = chx
             chyname = chxname
-            # for chy, chyname in enumerate(erp_df):
+            for chy, chyname in enumerate(erp_df):
             # print(chxname, chyname)
 
             # todo:
             # if(check_completed(task, f'{event_type}_{chxname}_{chyname}')):
             #     continue
 
-            mvl_2d[chx, chy] = pac.tfMVL_tfd2_2d(
-                tfds[chxname], tfds[chyname], [32, 200], [4, 40])
-            mvl[chx, chy] = pac.tfMVL_tfd2(
-                tfds[chxname], tfds[chyname], [32, 200], [4, 40])
+                mvl_2d[chx, chy] = pac.tfMVL_tfd2_2d(
+                    tfds[chxname], tfds[chyname], [32, 200], [4, 40])
+                mvl[chx, chy] = pac.tfMVL_tfd2(
+                    tfds[chxname], tfds[chyname], [32, 200], [4, 40])
             
         mvls[event_type] = mvl
         mvl_2ds[event_type] = mvl_2d
@@ -251,31 +257,27 @@ def analyse_sub(task):
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvl_2ds')),
                         **mvl_2ds)
     update_completed(task)
+    print(f'{task.participant_id} completed')
 
 
 # In[9]:
 
 
 if __name__ == '__main__':
-    BASE_PATH = os.path.dirname(os.path.abspath(''))
-    # DS_PATH = os.path.join(BASE_PATH, 'ds')
-    DS_PATH = os.path.join('/', 'Volumes', 'USB STICK', 'ds003490-download')
-
-    df = pd.read_csv(os.path.join(DS_PATH, 'participants.tsv'), sep="\t")
-
-    tasks_df = create_tasks_df(df)
+    tasks_df = create_tasks_df(DS_PATH)
 
     # __test__ = 1
     if '__test__' in locals():
         _test_tasks_df(tasks_df, 0)
 
     # analyse_sub(tasks_df.iloc[0])
-
-    from multiprocessing import Pool
-    with Pool(4) as p:
-        p.map(analyse_sub, tasks_df.iloc[4:])
-
-#     for task in tasks_df.iloc:
-#         analyse_task(task)
+    
+    if len(sys.argv) <= 1:
+        from multiprocessing import Pool
+        with Pool(4) as p:
+            p.map(analyse_sub, tasks_df.iloc)
+    else:
+        for task in tasks_df.iloc:
+            analyse_sub(task)
 
 
