@@ -153,6 +153,9 @@ def analyse_sub(task):
         task.dir, task.file_formatter.format('electrodes.elc')))
     raw.set_montage(montage)
 
+    # mne.viz.plot_topomap(raw._data[:, 194000], raw.info, axes=ax,
+    #                      show=False)
+
     eeg_picks = mne.pick_types(raw.info, eeg=True, meg=False, eog=True)
     freqs = (60, 120, 180, 240)
     raw_notch = raw.copy().notch_filter(freqs=freqs, picks=eeg_picks, verbose=0)

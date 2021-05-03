@@ -197,3 +197,7 @@ plots
 *.bz2
 *.rar
 *.zip
+
+## config file
+config.json
+.DS_Store
