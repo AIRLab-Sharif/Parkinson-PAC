@@ -244,8 +244,10 @@ def analyse_sub(task):
 
 # %%
 if __name__ == '__main__':
-    BASE_PATH = os.path.join(os.getenv('HOME'), 'DS') 
-    DS_PATH = os.path.join(BASE_PATH, 'ds003490-download')
+    # BASE_PATH = os.path.join(os.getenv('HOME'), 'DS') 
+    # DS_PATH = os.path.join(BASE_PATH, 'ds003490-download')
+    BASE_PATH = 'G:\\filmuniversity\\Master sharif\\MasterProject\\data'
+    DS_PATH = 'G:\\filmuniversity\\Master sharif\\MasterProject\\data\\parkinsons-oddball'
 
     df = pd.read_csv(os.path.join(DS_PATH, 'participants.tsv'), sep="\t")
 
