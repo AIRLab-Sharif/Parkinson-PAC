@@ -8,3 +8,12 @@ Preprocess
 7. ASR, reconstruction of Artifacts
 8. re-reference again
 9. Make ERP
+
+
+For run on server:
+1. At first, MakeTaskFileDebug should be runned on the server
+2. The path to task_track_file.csv should given to the Pipline_run_on_server_preprocess.mlx
+3. The path to Pipline_run_on_server_preprocess.mlx should be set as path in matlab
+4. Finally, Pipline_run_on_server_preprocess.mlx should be runned
+
+Note: all the above steps are checked locally but not on the server!
