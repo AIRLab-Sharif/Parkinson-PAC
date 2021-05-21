@@ -214,9 +214,9 @@ def analyse_sub(task):
 
     raw = mne.io.read_raw_eeglab(os.path.join(task['dir'], task['file_formatter'].format('eeg.set')),
                                  preload=True, verbose=0)
-    raw.set_eeg_reference()
+    
     raw.drop_channels(['X', 'Y', 'Z'])
-
+    raw.set_eeg_reference()
     create_elc_file(task)
     montage = mne.channels.read_custom_montage(os.path.join(
         task.dir, task.file_formatter.format('electrodes.elc')))
