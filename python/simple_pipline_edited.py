@@ -2,11 +2,12 @@
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
 from IPython import get_ipython
+
 i = 1
 
 # %%
 print(i)
-get_ipython().run_line_magic('config', 'Completer.use_jedi = False')
+# get_ipython().run_line_magic('config', 'Completer.use_jedi = False')
 
 
 # %%
@@ -18,7 +19,7 @@ import matplotlib.ticker as mticker
 import mne
 import json
 
-# import scipy.io as sio
+import scipy.io as sio
 # from scipy import signal
 
 import pac
@@ -37,14 +38,14 @@ def plot_pac(pac, high_freq, low_freq):
     ticks_loc = ax.get_xticks()
     ax.xaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
     xticks = [''] + [int(n) for n in np.linspace(low_freq[0],
-                                                 low_freq[1], ticks_loc.shape[0]-2).tolist()] + ['']
+                                                 low_freq[1], ticks_loc.shape[0] - 2).tolist()] + ['']
     ax.set_xticklabels(xticks)
 
     ax.yaxis.set_major_locator(mticker.MaxNLocator(10))
     ticks_loc = ax.get_yticks()
     ax.yaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
     yticks = [''] + [int(n) for n in np.linspace(high_freq[0],
-                                                 high_freq[1], ticks_loc.shape[0]-2).tolist()] + ['']
+                                                 high_freq[1], ticks_loc.shape[0] - 2).tolist()] + ['']
     ax.set_yticklabels(yticks)
 
     plt.show()
@@ -56,8 +57,8 @@ def create_elc_file(task):
             task.dir, task.file_formatter.format('electrodes.tsv')), sep="\t")
         locs = locs.iloc[:64]
         locs = locs.append(pd.DataFrame([{'name': 'RPA', 'x': 0, 'y': 1, 'z': 0},
-                                  {'name': 'LPA', 'x': 0, 'y': -1, 'z': 0},
-                                  {'name': 'Nz', 'x': 1, 'y': 0, 'z': 0}, ]))
+                                         {'name': 'LPA', 'x': 0, 'y': -1, 'z': 0},
+                                         {'name': 'Nz', 'x': 1, 'y': 0, 'z': 0}, ]))
         elc.write('\n'.join([
             '# ASA electrode file',
             'ReferenceLabel	avg',
@@ -91,8 +92,9 @@ def create_tasks_df(df):
             participant_tasks['pd_drug_type'] = pd_drug_type
             participant_tasks['isMale'] = participant['sex'] == 'Male'
             participant_tasks['age'] = participant['age']
-            participant_tasks['dir'] = os.path.join(DS_PATH, participant['participant_id'], f'ses-{sess:02}', 'eeg',)
-            participant_tasks['file'] = f'{participant["participant_id"]}_ses-{sess:02}_eeg_{participant["participant_id"]}_ses-{sess:02}_task-Rest_eeg.mat'
+            participant_tasks['dir'] = os.path.join(DS_PATH, participant['participant_id'], f'ses-{sess:02}', 'eeg', )
+            participant_tasks[
+                'file'] = f'{participant["participant_id"]}_ses-{sess:02}_eeg_{participant["participant_id"]}_ses-{sess:02}_task-Rest_eeg.mat'
             participant_tasks['file_formatter'] = f'{participant["participant_id"]}_ses-{sess:02}_task-Rest_{{}}'
             participant_tasks['path'] = os.path.join(
                 participant_tasks['dir'], participant_tasks['file'])
@@ -129,6 +131,7 @@ def _test_tasks_df(tasks_df, i=0):
 
     print(events)
 
+
 # %% [markdown]
 # # Create Task list in `tasks_df`
 
@@ -139,7 +142,7 @@ def check_completed(task, event=None) -> bool:
     if os.path.exists(json_path):
         with open(json_path) as f:
             completed = json.load(f)
-    
+
     if event is None:
         return completed.get('total', False)
     else:
@@ -157,7 +160,7 @@ def update_completed(task, event=None) -> bool:
         completed['total'] = True
     else:
         completed[event] = True
-        
+
     with open(json_path, 'w') as f:
         json.dump(completed, f)
 
@@ -169,8 +172,8 @@ def analyse_erps(erps: dict, task=None):
 
     for event_type, erp in erps.items():
         mvl_2d = np.zeros(
-            (erp.info['nchan'], erp.info['nchan'], 200-32+1, 40-4+1))
-        mvl = np.zeros((erp.info['nchan'], erp.info['nchan'], ))
+            (erp.info['nchan'], erp.info['nchan'], 200 - 32 + 1, 40 - 4 + 1))
+        mvl = np.zeros((erp.info['nchan'], erp.info['nchan'],))
         tfds = {}
 
         erp_df = erp.to_data_frame()
@@ -178,7 +181,7 @@ def analyse_erps(erps: dict, task=None):
 
         if task is not None:
             print(f'{task.participant_id} {event_type} tfd started')
-        
+
         for ch in erp_df:
             tfd = pac.rid_rihaczek(erp_df[ch], int(erp.info['sfreq']))
             tfds[ch] = tfd
@@ -197,7 +200,7 @@ def analyse_erps(erps: dict, task=None):
                 tfds[chxname], tfds[chyname], [32, 200], [4, 40])
             mvl[chx, chy] = pac.tfMVL_tfd2(
                 tfds[chxname], tfds[chyname], [32, 200], [4, 40])
-            
+
         mvls[event_type] = mvl
         mvl_2ds[event_type] = mvl_2d
 
@@ -206,7 +209,7 @@ def analyse_erps(erps: dict, task=None):
 
 # %%
 def analyse_sub(task):
-    if(check_completed(task)):
+    if (check_completed(task)):
         return
 
     raw = mne.io.read_raw_eeglab(os.path.join(task['dir'], task['file_formatter'].format('eeg.set')),
@@ -232,7 +235,7 @@ def analyse_sub(task):
     erps = {}
     for ev in selected_events:
         erps[ev] = epochs[ev].average()
-        
+
     mvls, mvl_2ds = analyse_erps(erps, task)
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvls')),
                         **mvls)
@@ -241,10 +244,9 @@ def analyse_sub(task):
     update_completed(task)
 
 
-
 # %%
 if __name__ == '__main__':
-    # BASE_PATH = os.path.join(os.getenv('HOME'), 'DS') 
+    # BASE_PATH = os.path.join(os.getenv('HOME'), 'DS')
     # DS_PATH = os.path.join(BASE_PATH, 'ds003490-download')
     BASE_PATH = 'G:\\filmuniversity\\Master sharif\\MasterProject\\data'
     DS_PATH = 'G:\\filmuniversity\\Master sharif\\MasterProject\\data\\parkinsons-oddball'
@@ -252,18 +254,18 @@ if __name__ == '__main__':
     df = pd.read_csv(os.path.join(DS_PATH, 'participants.tsv'), sep="\t")
 
     tasks_df = create_tasks_df(df)
-
     # __test__ = 1
     if '__test__' in locals():
         _test_tasks_df(tasks_df, 0)
 
     # analyse_sub(tasks_df.iloc[0])
 
-    from multiprocessing import Pool
-    with Pool(4) as p:
-        p.map(analyse_sub, tasks_df.iloc[4:])
+    # from multiprocessing import Pool
+    #
+    # with Pool(4) as p:
+    #     p.map(analyse_sub, tasks_df.iloc[4:])
 
-#     for task in tasks_df.iloc:
-#         analyse_task(task)
+    for task in tasks_df.iloc:
+        analyse_sub(task)
 
 
