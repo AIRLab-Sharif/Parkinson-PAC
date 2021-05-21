@@ -10,7 +10,7 @@ Preprocess
 9. Make ERP
 
 
-For run on server:
+For runing Preprocess on server:
 1. At first, MakeTaskFileDebug should be runned on the server
 2. The path to task_track_file.csv should given to the Pipline_run_on_server_preprocess.mlx
 3. The path to Pipline_run_on_server_preprocess.mlx should be set as path in matlab
