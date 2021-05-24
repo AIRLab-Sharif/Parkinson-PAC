@@ -70,20 +70,20 @@ def create_tasks_df(ds_path=None):
 
 
 def check_completed(task, event=None) -> bool:
-    json_path = os.path.join(task['dir'], task['file_formatter'].format('completed.json'))
+    json_path = os.path.join(task['dir'], task['file_formatter'].format('completed_1ch.json'))
     completed = {}
     if os.path.exists(json_path):
         with open(json_path) as f:
             completed = json.load(f)
-
+    
     if event is None:
         return completed.get('total', False)
     else:
         return completed.get(event, False)
 
 
-def update_completed(task, event=None):
-    json_path = os.path.join(task['dir'], task['file_formatter'].format('completed.json'))
+def update_completed(task, event=None) -> bool:
+    json_path = os.path.join(task['dir'], task['file_formatter'].format('completed_1ch.json'))
     completed = {}
     if os.path.exists(json_path):
         with open(json_path) as f:
@@ -93,7 +93,7 @@ def update_completed(task, event=None):
         completed['total'] = True
     else:
         completed[event] = True
-
+        
     with open(json_path, 'w') as f:
         json.dump(completed, f)
 
@@ -121,17 +121,17 @@ def analyse_erps(erps: dict, task=None):
         for chx, chxname in enumerate(erp_df):
             chy = chx
             chyname = chxname
-            for chy, chyname in enumerate(erp_df):
+            # for chy, chyname in enumerate(erp_df):
                 # print(chxname, chyname)
 
                 # todo:
                 # if(check_completed(task, f'{event_type}_{chxname}_{chyname}')):
                 #     continue
 
-                mvl_2d[chx, chy] = pac.tfMVL_tfd2_2d(
-                    tfds[chxname], tfds[chyname], [32, 200], [4, 40])
-                mvl[chx, chy] = pac.tfMVL_tfd2(
-                    tfds[chxname], tfds[chyname], [32, 200], [4, 40])
+            mvl_2d[chx, chy] = pac.tfMVL_tfd2_2d(
+                tfds[chxname], tfds[chyname], [32, 200], [4, 40])
+            mvl[chx, chy] = pac.tfMVL_tfd2(
+                tfds[chxname], tfds[chyname], [32, 200], [4, 40])
 
         mvls[event_type] = mvl
         mvl_2ds[event_type] = mvl_2d
@@ -143,10 +143,10 @@ def analyse_sub(task):
     if (check_completed(task)):
         return
 
-    raw = mne.io.read_raw_eeglab(os.path.join(task['dir'], task['file_formatter'].format('eeg.set')),
+    raw = mne.io.read_raw_eeglab(os.path.join(task['dir'], 'pre_' + task['file_formatter'].format('eeg.set')),
                                  preload=True, verbose=0)
     raw.set_eeg_reference()
-    raw.drop_channels(['X', 'Y', 'Z'])
+    # raw.drop_channels(['X', 'Y', 'Z'])
 
     create_elc_file(task)
     montage = mne.channels.read_custom_montage(os.path.join(
@@ -171,9 +171,9 @@ def analyse_sub(task):
         erps[ev] = epochs[ev].average()
 
     mvls, mvl_2ds = analyse_erps(erps, task)
-    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvls')),
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvls_1ch')),
                         **mvls)
-    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvl_2ds')),
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvl_2ds_1ch')),
                         **mvl_2ds)
     update_completed(task)
     print(f'{task.participant_id} completed')
