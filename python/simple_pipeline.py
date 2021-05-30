@@ -70,7 +70,7 @@ def create_tasks_df(ds_path=None):
 
 
 def check_completed(task, event=None) -> bool:
-    json_path = os.path.join(task['dir'], task['file_formatter'].format('completed_1ch.json'))
+    json_path = os.path.join(task['dir'], task['file_formatter'].format('completed_1ch_nv.json'))
     completed = {}
     if os.path.exists(json_path):
         with open(json_path) as f:
@@ -83,7 +83,7 @@ def check_completed(task, event=None) -> bool:
 
 
 def update_completed(task, event=None) -> bool:
-    json_path = os.path.join(task['dir'], task['file_formatter'].format('completed_1ch.json'))
+    json_path = os.path.join(task['dir'], task['file_formatter'].format('completed_1ch_nv.json'))
     completed = {}
     if os.path.exists(json_path):
         with open(json_path) as f:
@@ -145,8 +145,12 @@ def analyse_sub(task):
 
     raw = mne.io.read_raw_eeglab(os.path.join(task['dir'], 'pre_' + task['file_formatter'].format('eeg.set')),
                                  preload=True, verbose=0)
-    raw.set_eeg_reference()
     # raw.drop_channels(['X', 'Y', 'Z'])
+    raw.drop_channels(['VEOG'])
+    raw.set_eeg_reference()
+    
+    for ch in raw._data:
+        ch /= ch.std()
 
     create_elc_file(task)
     montage = mne.channels.read_custom_montage(os.path.join(
@@ -171,9 +175,9 @@ def analyse_sub(task):
         erps[ev] = epochs[ev].average()
 
     mvls, mvl_2ds = analyse_erps(erps, task)
-    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvls_1ch')),
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvls_1ch_nv')),
                         **mvls)
-    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvl_2ds_1ch')),
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvl_2ds_1ch_nv')),
                         **mvl_2ds)
     update_completed(task)
     print(f'{task.participant_id} completed')
