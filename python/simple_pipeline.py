@@ -150,6 +150,7 @@ def analyse_sub(task):
     raw.set_eeg_reference()
     
     for ch in raw._data:
+        ch -= ch.mean()
         ch /= ch.std()
 
     create_elc_file(task)
