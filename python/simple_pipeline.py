@@ -9,6 +9,12 @@ import pandas as pd
 import pac
 
 
+
+suffix = '_limited'#'_1ch_nv'
+gamma = [20, 80]
+beta  = [ 4, 16]
+
+
 def create_elc_file(task):
     with open(os.path.join(task.dir, task.file_formatter.format('electrodes.elc')), 'w') as elc:
         locs = pd.read_csv(os.path.join(
@@ -70,7 +76,7 @@ def create_tasks_df(ds_path=None):
 
 
 def check_completed(task, event=None) -> bool:
-    json_path = os.path.join(task['dir'], task['file_formatter'].format('completed_1ch_nv.json'))
+    json_path = os.path.join(task['dir'], task['file_formatter'].format(f'completed{suffix}.json'))
     completed = {}
     if os.path.exists(json_path):
         with open(json_path) as f:
@@ -83,7 +89,7 @@ def check_completed(task, event=None) -> bool:
 
 
 def update_completed(task, event=None) -> bool:
-    json_path = os.path.join(task['dir'], task['file_formatter'].format('completed_1ch_nv.json'))
+    json_path = os.path.join(task['dir'], task['file_formatter'].format(f'completed{suffix}.json'))
     completed = {}
     if os.path.exists(json_path):
         with open(json_path) as f:
@@ -101,10 +107,12 @@ def update_completed(task, event=None) -> bool:
 def analyse_erps(erps: dict, task=None):
     mvls = {}
     mvl_2ds = {}
+    
+    groups = ['PD Med Off', 'PD Med On', 'CTL']
 
     for event_type, erp in erps.items():
         mvl_2d = np.zeros(
-            (erp.info['nchan'], erp.info['nchan'], 200 - 32 + 1, 40 - 4 + 1))
+            (erp.info['nchan'], erp.info['nchan'], gamma[1] - gamma[0] + 1, beta[1] - beta[0] + 1))
         mvl = np.zeros((erp.info['nchan'], erp.info['nchan'],))
         tfds = {}
 
@@ -112,7 +120,7 @@ def analyse_erps(erps: dict, task=None):
         erp_df = erp_df.set_index('time')
 
         if task is not None:
-            print(f'{task.participant_id} {event_type} tfd started')
+            print(f'{task.participant_id} {groups[task.pd_drug_type]:10} {event_type} tfd started')
 
         for ch in erp_df:
             tfd = pac.rid_rihaczek(erp_df[ch], int(erp.info['sfreq']))
@@ -129,9 +137,9 @@ def analyse_erps(erps: dict, task=None):
                 #     continue
 
             mvl_2d[chx, chy] = pac.tfMVL_tfd2_2d(
-                tfds[chxname], tfds[chyname], [32, 200], [4, 40])
+                tfds[chxname], tfds[chyname], gamma, beta)
             mvl[chx, chy] = pac.tfMVL_tfd2(
-                tfds[chxname], tfds[chyname], [32, 200], [4, 40])
+                tfds[chxname], tfds[chyname], gamma, beta)
 
         mvls[event_type] = mvl
         mvl_2ds[event_type] = mvl_2d
@@ -152,10 +160,12 @@ def analyse_sub(task):
     for ch in raw._data:
         ch -= ch.mean()
         ch /= ch.std()
+        ch *= 1e-6
 
-    create_elc_file(task)
-    montage = mne.channels.read_custom_montage(os.path.join(
-        task.dir, task.file_formatter.format('electrodes.elc')))
+    # create_elc_file(task)
+    # montage = mne.channels.read_custom_montage(os.path.join(
+    #     task.dir, task.file_formatter.format('electrodes.elc')))
+    montage = mne.channels.read_custom_montage('Standard-10-20-Cap81.locs')
     raw.set_montage(montage)
 
     # mne.viz.plot_topomap(raw._data[:, 194000], raw.info, axes=ax,
@@ -176,9 +186,9 @@ def analyse_sub(task):
         erps[ev] = epochs[ev].average()
 
     mvls, mvl_2ds = analyse_erps(erps, task)
-    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvls_1ch_nv')),
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvls{suffix}')),
                         **mvls)
-    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format('mvl_2ds_1ch_nv')),
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvl_2ds{suffix}')),
                         **mvl_2ds)
     update_completed(task)
     print(f'{task.participant_id} completed')
