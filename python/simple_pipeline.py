@@ -138,8 +138,9 @@ def analyse_erps(erps: dict, task=None):
 
             mvl_2d[chx, chy] = pac.tfMVL_tfd2_2d(
                 tfds[chxname], tfds[chyname], gamma, beta)
-            mvl[chx, chy] = pac.tfMVL_tfd2(
-                tfds[chxname], tfds[chyname], gamma, beta)
+            mvl[chx, chy] = mvl_2d[chx, chy].sum()
+            # mvl[chx, chy] = pac.tfMVL_tfd2(
+            #     tfds[chxname], tfds[chyname], gamma, beta)
 
         mvls[event_type] = mvl
         mvl_2ds[event_type] = mvl_2d
@@ -172,12 +173,12 @@ def analyse_sub(task):
     #                      show=False)
 
     eeg_picks = mne.pick_types(raw.info, eeg=True, meg=False, eog=True)
-    freqs = (60, 120, 180, 240)
-    raw_notch = raw.copy().notch_filter(freqs=freqs, picks=eeg_picks, verbose=0)
-    raw_filtered = raw_notch.copy().filter(l_freq=1, h_freq=150, verbose=0)
+    # freqs = (60, 120, 180, 240)
+    # raw_notch = raw.copy().notch_filter(freqs=freqs, picks=eeg_picks, verbose=0)
+    # raw_filtered = raw_notch.copy().filter(l_freq=1, h_freq=150, verbose=0)
 
-    events, event_dict = mne.events_from_annotations(raw_filtered, verbose=0)
-    epochs = mne.Epochs(raw_filtered, events, event_id=event_dict,
+    events, event_dict = mne.events_from_annotations(raw, verbose=0)
+    epochs = mne.Epochs(raw, events, event_id=event_dict,
                         tmin=-0.2, tmax=1, preload=True, verbose=0)
 
     selected_events = ['S200', 'S201', 'S202']
