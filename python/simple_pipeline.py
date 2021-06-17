@@ -185,6 +185,14 @@ def analyse_sub(task):
     erps = {}
     for ev in selected_events:
         erps[ev] = epochs[ev].average()
+        
+    #np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'epochs')),
+    #                    **epochs)
+    
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'erps')),
+                        **erps)
+    
+#     return
 
     mvls, mvl_2ds = analyse_erps(erps, task)
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvls{suffix}')),
