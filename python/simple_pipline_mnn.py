@@ -186,17 +186,25 @@ def analyse_sub(task):
     for ev in selected_events:
         erps[ev] = epochs[ev].average()
 
-    ## MismatchNegativity
+    # MismatchNegativity calculation and save
     erp_df_s200 = erps['S200'].to_data_frame()
-    erp_df = erp_df_s200.set_index('time')
 
     erp_df_s201 = erps['S201'].to_data_frame()
-    erp_df = erp_df_s201.set_index('time')
 
     erp_df_s202 = erps['S202'].to_data_frame()
-    erp_df = erp_df_s202.set_index('time')
+    
+    ## Remove time colummn, not to save
+    erp_df_s200=erp_df_s200.drop('time',axis=1)
+    erp_df_s201=erp_df_s201.drop('time',axis=1)
+    erp_df_s202=erp_df_s202.drop('time',axis=1)
 
     Tr = erp_df_s200-erp_df_s201
+    Nov = erp_df_s202-erp_df_s201
+
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mnn_Tr_{suffix}')),
+                        Tr)
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mnn_Nov_{suffix}')),
+                        Nov)
     ##########################################################    
     
     mvls, mvl_2ds = analyse_erps(erps, task)
