@@ -186,6 +186,7 @@ def analyse_sub(task):
     for ev in selected_events:
         erps[ev] = epochs[ev].average()
 
+    
     # MismatchNegativity calculation and save
     erp_df_s200 = erps['S200'].to_data_frame()
 
@@ -206,12 +207,6 @@ def analyse_sub(task):
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mnn_Nov_{suffix}')),
                         Nov)
     ##########################################################    
-    
-    mvls, mvl_2ds = analyse_erps(erps, task)
-    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvls{suffix}')),
-                        **mvls)
-    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvl_2ds{suffix}')),
-                        **mvl_2ds)
     update_completed(task)
     print(f'{task.participant_id} completed')
 
