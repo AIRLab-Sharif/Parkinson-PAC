@@ -149,8 +149,8 @@ def analyse_erps(erps: dict, task=None):
 
 
 def analyse_sub(task):
-    if (check_completed(task)):
-        return
+#     if (check_completed(task)):
+#         return
 
     raw = mne.io.read_raw_eeglab(os.path.join(task['dir'], 'pre_' + task['file_formatter'].format('eeg.set')),
                                  preload=True, verbose=0)
@@ -183,16 +183,18 @@ def analyse_sub(task):
 
     selected_events = ['S200', 'S201', 'S202']
     erps = {}
+    epochs_data = {}
     for ev in selected_events:
         erps[ev] = epochs[ev].average()
+        epochs_data[ev] = epochs[ev]._data
         
-    #np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'epochs')),
-    #                    **epochs)
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'epochs')),
+                        **epochs_data)
     
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'erps')),
                         **erps)
     
-#     return
+    return
 
     mvls, mvl_2ds = analyse_erps(erps, task)
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvls{suffix}')),
