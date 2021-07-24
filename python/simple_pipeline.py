@@ -179,7 +179,7 @@ def analyse_sub(task):
 
     events, event_dict = mne.events_from_annotations(raw, verbose=0)
     epochs = mne.Epochs(raw, events, event_id=event_dict,
-                        tmin=-0.2, tmax=1, preload=True, verbose=0)
+                        tmin=-0.2, tmax=1.45, preload=True, verbose=0)
 
 #     selected_events = ['S200', 'S201', 'S202']
 #     erps = {}
@@ -187,11 +187,11 @@ def analyse_sub(task):
 #     for ev in selected_events:
 #         erps[ev] = epochs[ev].average()
 #         epochs_data[ev] = epochs[ev]._data
-    selected_events = ['S200', 'S201', 'S202']
+#    selected_events = ['S200', 'S201', 'S202']
     event_types = {'S200': 'Target', 'S201': 'Standard', 'S202':'Novelty'}
     erps = {}
     epochs_data = {}
-    for ev in selected_events:
+    for ev in event_types.keys():
         erps[ev] = epochs[ev].average()
         if event_types[ev] in ['Target', 'Standard']:
             epochs_data[ev] = epochs[ev]._data[:, :, -601:]
