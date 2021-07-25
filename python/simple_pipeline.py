@@ -161,7 +161,6 @@ def analyse_sub(task):
     for ch in raw._data:
         ch -= ch.mean()
         ch /= ch.std()
-        ch *= 1e-6
 
     # create_elc_file(task)
     # montage = mne.channels.read_custom_montage(os.path.join(
@@ -203,8 +202,6 @@ def analyse_sub(task):
     
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'erps')),
                         **erps)
-    
-    return
 
     mvls, mvl_2ds = analyse_erps(erps, task)
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvls{suffix}')),
