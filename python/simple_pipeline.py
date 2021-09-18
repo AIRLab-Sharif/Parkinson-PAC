@@ -10,7 +10,7 @@ import pac
 
 
 
-suffix = '_delay_corrected'#'_1ch_nv'
+suffix = '_time_PAC'#'_1ch_nv'
 gamma = [20, 80]
 beta  = [ 4, 16]
 
@@ -107,12 +107,18 @@ def update_completed(task, event=None) -> bool:
 def analyse_erps(erps: dict, task=None):
     mvls = {}
     mvl_2ds = {}
+    mvl_2d_times = {}
+    
+    steps = list(range(-200, 1000 + 1, 100))
     
     groups = ['PD Med Off', 'PD Med On', 'CTL']
 
     for event_type, erp in erps.items():
         mvl_2d = np.zeros(
             (erp.info['nchan'], erp.info['nchan'], gamma[1] - gamma[0] + 1, beta[1] - beta[0] + 1))
+        mvl_2d_time = np.zeros((erp.info['nchan'], gamma[1] - gamma[0] + 1, 
+                                beta[1] - beta[0] + 1, len(steps) - 1 ))
+
         mvl = np.zeros((erp.info['nchan'], erp.info['nchan'],))
         tfds = {}
 
@@ -129,28 +135,36 @@ def analyse_erps(erps: dict, task=None):
         for chx, chxname in enumerate(erp_df):
             chy = chx
             chyname = chxname
-            # for chy, chyname in enumerate(erp_df):
-                # print(chxname, chyname)
+            
+            for i, ts in enumerate(zip(steps[:-1], steps[1:])):
+                tstart, tend = ts
+                ind_start = np.where(erp_df.index == tstart)[0][0]
+                ind_end   = np.where(erp_df.index == tend)[0][0]
+                mvl_2d_time[chx, :, :, i] = pac.tfMVL_tfd2_2d_time(
+                    tfds[chxname], tfds[chxname], gamma, beta, ind_start, ind_end)
 
+            
+            for chy, chyname in enumerate(erp_df):
                 # todo:
                 # if(check_completed(task, f'{event_type}_{chxname}_{chyname}')):
                 #     continue
 
-            mvl_2d[chx, chy] = pac.tfMVL_tfd2_2d(
-                tfds[chxname], tfds[chyname], gamma, beta)
-            mvl[chx, chy] = mvl_2d[chx, chy].sum()
+                mvl_2d[chx, chy] = pac.tfMVL_tfd2_2d(
+                    tfds[chxname], tfds[chyname], gamma, beta)
+                mvl[chx, chy] = mvl_2d[chx, chy].sum()
             # mvl[chx, chy] = pac.tfMVL_tfd2(
             #     tfds[chxname], tfds[chyname], gamma, beta)
 
         mvls[event_type] = mvl
         mvl_2ds[event_type] = mvl_2d
+        mvl_2d_times[event_type] = mvl_2d_time
 
-    return mvls, mvl_2ds
+    return mvls, mvl_2ds, mvl_2d_times
 
 
 def analyse_sub(task):
-#     if (check_completed(task)):
-#         return
+    if (check_completed(task)):
+        return
 
     raw = mne.io.read_raw_eeglab(os.path.join(task['dir'], 'pre_' + task['file_formatter'].format('eeg.set')),
                                  preload=True, verbose=0)
@@ -180,34 +194,34 @@ def analyse_sub(task):
     epochs = mne.Epochs(raw, events, event_id=event_dict,
                         tmin=-0.2, tmax=1.45, preload=True, verbose=0)
 
-#     selected_events = ['S200', 'S201', 'S202']
-#     erps = {}
-#     epochs_data = {}
-#     for ev in selected_events:
-#         erps[ev] = epochs[ev].average()
-#         epochs_data[ev] = epochs[ev]._data
-#    selected_events = ['S200', 'S201', 'S202']
+    selected_events = ['S200', 'S201', 'S202']
     event_types = {'S200': 'Target', 'S201': 'Standard', 'S202':'Novelty'}
+    
     erps = {}
     epochs_data = {}
-    for ev in event_types.keys():
+    for ev in selected_events:
         erps[ev] = epochs[ev].average()
         if event_types[ev] in ['Target', 'Standard']:
             epochs_data[ev] = epochs[ev]._data[:, :, -601:]
         else:
             epochs_data[ev] = epochs[ev]._data[:, :, :601]
+
         
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'epochs')),
                         **epochs_data)
     
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'erps')),
                         **erps)
+    
+#     return
 
-    mvls, mvl_2ds = analyse_erps(erps, task)
+    mvls, mvl_2ds, mvl_2d_times = analyse_erps(erps, task)
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvls{suffix}')),
                         **mvls)
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvl_2ds{suffix}')),
                         **mvl_2ds)
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvl_2d_times{suffix}')),
+                        **mvl_2d_times)
     update_completed(task)
     print(f'{task.participant_id} completed')
 
