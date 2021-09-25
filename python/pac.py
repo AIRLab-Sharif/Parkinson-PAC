@@ -219,6 +219,47 @@ def tfMVL_tfd2_2d(tfdx, tfdy, high_freq, low_freq):
     return tf_canolty
 
 
+def tfMVL_tfd2_2d_time(tfdx, tfdy, high_freq, low_freq, ind_start, ind_end):
+    '''
+    This is python implementation of MVL_lab function
+    which was implemented in MATLAB by Munia in this repository
+    https://github.com/muntam/TF-PAC
+
+    The repository was implemented for
+    Munia, T.T.K., Aviyente, S. Time-Frequency Based Phase-Amplitude
+    Coupling Measure For Neuronal Oscillations. Sci Rep 9, 12441 (2019).
+    https://doi.org/10.1038/s41598-019-48870-2
+
+    This function computes the phase amplitude coupling using TF-MVL method.
+
+    Parameter:
+        tfd          : input time frequency decomposition 
+        high_freq    : Amplitude Frequency range 
+        low_freq     : Phase Frequency range 
+        Fs           : Sampling Frequency  
+
+    Returns:
+        tf_canolty   : Computed PAC using TF-MVL method
+
+    Written by: Mahdi Kiani, August 2021
+    '''
+
+    # Amplitude and Phase calculation
+    tfdx = tfdx[:, ind_start:ind_end]
+    tfdy = tfdy[:, ind_start:ind_end]
+    tf_canolty = np.zeros((high_freq[1] - high_freq[0] + 1, low_freq[1] - low_freq[0] + 1))
+    for i, h_freq in enumerate(range(high_freq[0], high_freq[1] + 1)):
+        for j, l_freq in enumerate(range(low_freq[0], low_freq[1] + 1)):
+            Amp = abs(tfdx[h_freq, :])
+            tfd_low = tfdy[l_freq, :]
+            angle_low = np.angle(tfd_low)
+            Phase = angle_low
+
+            tf_canolty[i, j] = _calc_MVL(Phase, Amp)
+
+    return tf_canolty
+
+
 def tfMVL_tfd(tfd, high_freq, low_freq):
     '''
     This is python implementation of MVL_lab function
