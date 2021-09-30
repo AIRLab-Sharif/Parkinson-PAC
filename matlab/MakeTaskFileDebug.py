@@ -8,12 +8,12 @@ import os
 
 
 # %%
-file_name = os.path.join('/mnt/D/Mastersharif/MasterProject/data/parkinsons-oddball','participants.tsv')
+file_name = os.path.join('D:\Mastersharif\MasterProject\data\parkinsons-oddball','participants.tsv')
 df_participants = pd.read_csv(file_name, delimiter='\t')
 
 
 path_datasets = ''
-all_number_task = 75;
+all_number_task = 75
 # tasks = {'local_file_path': np.array([]),
 #         'raw_data_file_name':np.array([]),
 #         'preprocessed_one':np.array([]),'flag1':np.zeros(all_number_task,),
@@ -24,6 +24,8 @@ tasks = {'local_file_path': np.array([]),
         'raw_data_file_name':np.array([]),
         'preprocessed_one':np.array([]),
         'ERP_mat_file':np.array([]),
+        'ERP_npy_file':np.array([]),
+        'ERP_nobaseline_npy_file':np.array([]),
         'PAC_sequences_v1':np.array([]),
         'Group_file_type':np.array([])}
 
@@ -42,12 +44,21 @@ for row in df_participants.iterrows():
 
         tasks['ERP_mat_file'] = np.append(tasks['ERP_mat_file'],'ERP_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
         tasks['ERP_mat_file'] = np.append(tasks['ERP_mat_file'],'ERP_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(2))
+        
+        tasks['ERP_npy_file'] = np.append(tasks['ERP_npy_file'],'ERP_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
+        tasks['ERP_npy_file'] = np.append(tasks['ERP_npy_file'],'ERP_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(2))
 
         # tasks['PAC_sequences'] = np.append(tasks['PAC_sequences'],'PAC_sequences_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
         # tasks['PAC_sequences'] = np.append(tasks['PAC_sequences'],'PAC_sequences_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(2))
 
+        tasks['ERP_nobaseline_npy_file'] = np.append(tasks['ERP_nobaseline_npy_file'],'ERP_nb_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
+        tasks['ERP_nobaseline_npy_file'] = np.append(tasks['ERP_nobaseline_npy_file'],'ERP_nb_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(2))
+
+        
         tasks['PAC_sequences_v1'] = np.append(tasks['PAC_sequences_v1'], 'PAC_sequences_v1' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
         tasks['PAC_sequences_v1'] = np.append(tasks['PAC_sequences_v1'], 'PAC_sequences_v1' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(2))
+        
+        
         # tasks['PAC_dist_mean_channel'] = np.append(tasks['PAC_dist_mean_channel'],'PAC_mean_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
         # tasks['PAC_dist_mean_channel'] = np.append(tasks['PAC_dist_mean_channel'],'PAC_mean_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(2))
 
@@ -67,6 +78,10 @@ for row in df_participants.iterrows():
         
         tasks['ERP_mat_file'] = np.append(tasks['ERP_mat_file'],'ERP_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
         
+        tasks['ERP_npy_file'] = np.append(tasks['ERP_npy_file'],'ERP_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
+        
+        tasks['ERP_nobaseline_npy_file'] = np.append(tasks['ERP_nobaseline_npy_file'],'ERP_nb_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
+
         tasks['PAC_sequences_v1'] = np.append(tasks['PAC_sequences_v1'],'PAC_sequence_v1' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
         
         # tasks['PAC_dist_mean_channel'] = np.append(tasks['PAC_dist_mean_channel'],'PAC_mean_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
