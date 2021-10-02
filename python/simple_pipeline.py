@@ -10,7 +10,7 @@ import pac
 
 
 
-suffix = '_time_PAC'#'_1ch_nv'
+suffix = '_time_PAC2'#'_1ch_nv'
 gamma = [20, 80]
 beta  = [ 4, 16]
 
@@ -109,7 +109,7 @@ def analyse_erps(erps: dict, task=None):
     mvl_2ds = {}
     mvl_2d_times = {}
     
-    steps = list(range(-200, 1000 + 1, 100))
+    steps = list(range(-200, 1000 + 1, 200))
     
     groups = ['PD Med Off', 'PD Med On', 'CTL']
 
@@ -189,22 +189,25 @@ def analyse_sub(task):
     # freqs = (60, 120, 180, 240)
     # raw_notch = raw.copy().notch_filter(freqs=freqs, picks=eeg_picks, verbose=0)
     # raw_filtered = raw_notch.copy().filter(l_freq=1, h_freq=150, verbose=0)
-
+    
     events, event_dict = mne.events_from_annotations(raw, verbose=0)
-    epochs = mne.Epochs(raw, events, event_id=event_dict,
-                        tmin=-0.2, tmax=1.45, preload=True, verbose=0)
 
     selected_events = ['S200', 'S201', 'S202']
     event_types = {'S200': 'Target', 'S201': 'Standard', 'S202':'Novelty'}
-    
+    kwargs = {'S200': {'baseline': (0.250, 0.450), 'tmin': 0.250, 'tmax':1.450},
+              'S201': {'baseline': (0.250, 0.450), 'tmin': 0.250, 'tmax':1.450},
+              'S202': {'baseline': (-.200,     0), 'tmin': -.200, 'tmax':1.000},}
+
     erps = {}
     epochs_data = {}
     for ev in selected_events:
+        epochs = mne.Epochs(raw, events[events[:, 2] == event_dict[ev]],
+                            event_id={ev: event_dict[ev]}, preload=True, verbose=0, **(kwargs[ev]))
         erps[ev] = epochs[ev].average()
         if event_types[ev] in ['Target', 'Standard']:
-            epochs_data[ev] = epochs[ev]._data[:, :, -601:]
+            epochs_data[ev] = epochs[ev]._data
         else:
-            epochs_data[ev] = epochs[ev]._data[:, :, :601]
+            epochs_data[ev] = epochs[ev]._data
 
         
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'epochs')),
@@ -224,8 +227,8 @@ def analyse_sub(task):
                         **mvl_2d_times)
     update_completed(task)
     print(f'{task.participant_id} completed')
-
-
+    
+    
 if __name__ == '__main__':
     tasks_df = create_tasks_df()
 
