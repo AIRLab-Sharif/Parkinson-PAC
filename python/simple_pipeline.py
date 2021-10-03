@@ -123,6 +123,7 @@ def analyse_erps(erps: dict, task=None):
         tfds = {}
 
         erp_df = erp.to_data_frame()
+        erp_df.time = list(range(-200, 1000 + 1, 2))
         erp_df = erp_df.set_index('time')
 
         if task is not None:
