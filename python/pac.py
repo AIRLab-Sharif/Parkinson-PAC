@@ -1,7 +1,9 @@
 # %%
 import math
+from mne import parallel
 import numpy as np
 import matplotlib.pyplot as plt
+from numba import jit, cuda
 
 
 def _rhu(n):
@@ -78,7 +80,7 @@ def _chwi_krn(D: np.ndarray, L: np.ndarray, A: int = None):
 
     return K
 
-
+@jit(parallel=True)
 def rid_rihaczek(x: np.ndarray, fbins: int):
     '''
     This is python implementation of rid_rihaczek4 function
@@ -259,7 +261,7 @@ def tfMVL_tfd2_2d_time(tfdx, tfdy, high_freq, low_freq, ind_start, ind_end):
 
     return tf_canolty
 
-
+@jit
 def tfMVL_tfd(tfd, high_freq, low_freq):
     '''
     This is python implementation of MVL_lab function
@@ -333,7 +335,7 @@ def tfMVL_tfd2(tfdx, tfdy, high_freq, low_freq):
 
     return tf_canolty
 
-
+@jit
 def tfMVL(x, high_freq, low_freq, Fs):
     '''
     This is python implementation of tfMVL function

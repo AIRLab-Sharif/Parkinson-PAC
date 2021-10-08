@@ -1,13 +1,13 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
-# %%
+
 import pandas as pd
 import numpy as np
 import os
 
 
 
-# %%
+
 file_name = os.path.join('D:\Mastersharif\MasterProject\data\parkinsons-oddball','participants.tsv')
 df_participants = pd.read_csv(file_name, delimiter='\t')
 
@@ -55,8 +55,8 @@ for row in df_participants.iterrows():
         tasks['ERP_nobaseline_npy_file'] = np.append(tasks['ERP_nobaseline_npy_file'],'ERP_nb_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(2))
 
         
-        tasks['PAC_sequences_v1'] = np.append(tasks['PAC_sequences_v1'], 'PAC_sequences_v1' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
-        tasks['PAC_sequences_v1'] = np.append(tasks['PAC_sequences_v1'], 'PAC_sequences_v1' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(2))
+        tasks['PAC_sequences_v1'] = np.append(tasks['PAC_sequences_v1'], 'PAC_sequences_selected_ch_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
+        tasks['PAC_sequences_v1'] = np.append(tasks['PAC_sequences_v1'], 'PAC_sequences_selected_ch_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(2))
         
         
         # tasks['PAC_dist_mean_channel'] = np.append(tasks['PAC_dist_mean_channel'],'PAC_mean_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
@@ -82,7 +82,7 @@ for row in df_participants.iterrows():
         
         tasks['ERP_nobaseline_npy_file'] = np.append(tasks['ERP_nobaseline_npy_file'],'ERP_nb_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
 
-        tasks['PAC_sequences_v1'] = np.append(tasks['PAC_sequences_v1'],'PAC_sequence_v1' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
+        tasks['PAC_sequences_v1'] = np.append(tasks['PAC_sequences_v1'],'PAC_sequence_selected_ch_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
         
         # tasks['PAC_dist_mean_channel'] = np.append(tasks['PAC_dist_mean_channel'],'PAC_mean_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
 
@@ -92,7 +92,7 @@ for row in df_participants.iterrows():
             
 
 task_df = pd.DataFrame(tasks)
-task_df.to_csv('task_track_file.csv')
+task_df.to_csv('.\\task_track_files\\task_track_file_pac_sequences_ch.csv')
 
 
 
