@@ -10,7 +10,7 @@ import pac
 
 
 
-suffix = '_time_PAC'#'_1ch_nv'
+suffix = '_time_PAC4'#'_1ch_nv'
 gamma = [20, 80]
 beta  = [ 4, 16]
 
@@ -81,7 +81,7 @@ def check_completed(task, event=None) -> bool:
     if os.path.exists(json_path):
         with open(json_path) as f:
             completed = json.load(f)
-    
+
     if event is None:
         return completed.get('total', False)
     else:
@@ -99,7 +99,7 @@ def update_completed(task, event=None) -> bool:
         completed['total'] = True
     else:
         completed[event] = True
-        
+
     with open(json_path, 'w') as f:
         json.dump(completed, f)
 
@@ -108,21 +108,22 @@ def analyse_erps(erps: dict, task=None):
     mvls = {}
     mvl_2ds = {}
     mvl_2d_times = {}
-    
-    steps = list(range(-200, 1000 + 1, 100))
-    
+
+    steps = list(range(-200, 1000 + 1, 200))
+
     groups = ['PD Med Off', 'PD Med On', 'CTL']
 
     for event_type, erp in erps.items():
         mvl_2d = np.zeros(
             (erp.info['nchan'], erp.info['nchan'], gamma[1] - gamma[0] + 1, beta[1] - beta[0] + 1))
-        mvl_2d_time = np.zeros((erp.info['nchan'], gamma[1] - gamma[0] + 1, 
+        mvl_2d_time = np.zeros((erp.info['nchan'], gamma[1] - gamma[0] + 1,
                                 beta[1] - beta[0] + 1, len(steps) - 1 ))
 
         mvl = np.zeros((erp.info['nchan'], erp.info['nchan'],))
         tfds = {}
 
         erp_df = erp.to_data_frame()
+        erp_df.time = list(range(-200, 1000 + 1, 2))
         erp_df = erp_df.set_index('time')
 
         if task is not None:
@@ -135,7 +136,7 @@ def analyse_erps(erps: dict, task=None):
         for chx, chxname in enumerate(erp_df):
             chy = chx
             chyname = chxname
-            
+
             for i, ts in enumerate(zip(steps[:-1], steps[1:])):
                 tstart, tend = ts
                 ind_start = np.where(erp_df.index == tstart)[0][0]
@@ -143,7 +144,7 @@ def analyse_erps(erps: dict, task=None):
                 mvl_2d_time[chx, :, :, i] = pac.tfMVL_tfd2_2d_time(
                     tfds[chxname], tfds[chxname], gamma, beta, ind_start, ind_end)
 
-            
+
             for chy, chyname in enumerate(erp_df):
                 # todo:
                 # if(check_completed(task, f'{event_type}_{chxname}_{chyname}')):
@@ -170,8 +171,8 @@ def analyse_sub(task):
                                  preload=True, verbose=0)
     # raw.drop_channels(['X', 'Y', 'Z'])
     raw.drop_channels(['VEOG'])
-    raw.set_eeg_reference()
-    
+    # raw.set_eeg_reference()
+
     for ch in raw._data:
         ch -= ch.mean()
         ch /= ch.std()
@@ -185,26 +186,26 @@ def analyse_sub(task):
     # mne.viz.plot_topomap(raw._data[:, 194000], raw.info, axes=ax,
     #                      show=False)
 
-    eeg_picks = mne.pick_types(raw.info, eeg=True, meg=False, eog=True)
+    # eeg_picks = mne.pick_types(raw.info, eeg=True, meg=False, eog=True)
     # freqs = (60, 120, 180, 240)
     # raw_notch = raw.copy().notch_filter(freqs=freqs, picks=eeg_picks, verbose=0)
     # raw_filtered = raw_notch.copy().filter(l_freq=1, h_freq=150, verbose=0)
-
+    
     events, event_dict = mne.events_from_annotations(raw, verbose=0)
-    epochs = mne.Epochs(raw, events, event_id=event_dict,
-                        tmin=-0.2, tmax=1.45, preload=True, verbose=0)
 
     selected_events = ['S200', 'S201', 'S202']
     event_types = {'S200': 'Target', 'S201': 'Standard', 'S202':'Novelty'}
-    
+    kwargs = {'S200': {'baseline': (0.250, 0.450), 'tmin': 0.250, 'tmax':1.450},
+              'S201': {'baseline': (0.250, 0.450), 'tmin': 0.250, 'tmax':1.450},
+              'S202': {'baseline': (-.200,     0), 'tmin': -.200, 'tmax':1.000},}
+
     erps = {}
     epochs_data = {}
     for ev in selected_events:
+        epochs = mne.Epochs(raw, events[events[:, 2] == event_dict[ev]],
+                            event_id={ev: event_dict[ev]}, preload=True, verbose=0, **(kwargs[ev]))
         erps[ev] = epochs[ev].average()
-        if event_types[ev] in ['Target', 'Standard']:
-            epochs_data[ev] = epochs[ev]._data[:, :, -601:]
-        else:
-            epochs_data[ev] = epochs[ev]._data[:, :, :601]
+        epochs_data[ev] = epochs[ev]._data
 
         
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'epochs')),
@@ -224,8 +225,8 @@ def analyse_sub(task):
                         **mvl_2d_times)
     update_completed(task)
     print(f'{task.participant_id} completed')
-
-
+    
+    
 if __name__ == '__main__':
     tasks_df = create_tasks_df()
 
