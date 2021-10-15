@@ -3,7 +3,7 @@
 clear
 %eeglab
 
-T = readtable('task_track_file.csv','Format','%d%s%s%s%s%s%s');
+T = readtable('..\task_track_files\task_track_file_matlab.csv','Format','%d%s%s%s%s%s%s%s%s%s');
 
 Path = {'/home/kiani/DS/ds003490-download'};
 files_preprocessed = fullfile(Path,T{:,2},T{:,4});

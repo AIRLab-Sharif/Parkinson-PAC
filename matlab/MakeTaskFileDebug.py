@@ -25,6 +25,7 @@ tasks = {'local_file_path': np.array([]),
         'preprocessed_one':np.array([]),
         'ERP_mat_file':np.array([]),
         'ERP_npy_file':np.array([]),
+        'ERP_npy_file_with_normalization_and_baseline_correction':np.array([]),
         'ERP_nobaseline_npy_file':np.array([]),
         'PAC_sequences_v1':np.array([]),
         'Group_file_type':np.array([])}
@@ -48,6 +49,9 @@ for row in df_participants.iterrows():
         tasks['ERP_npy_file'] = np.append(tasks['ERP_npy_file'],'ERP_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
         tasks['ERP_npy_file'] = np.append(tasks['ERP_npy_file'],'ERP_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(2))
 
+        tasks['ERP_npy_file_with_normalization_and_baseline_correction'] = np.append(tasks['ERP_npy_file_with_normalization_and_baseline_correction'],'ERP_base_correct_normalization_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
+        tasks['ERP_npy_file_with_normalization_and_baseline_correction'] = np.append(tasks['ERP_npy_file_with_normalization_and_baseline_correction'],'ERP_base_correct_normalization_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(2))
+        
         # tasks['PAC_sequences'] = np.append(tasks['PAC_sequences'],'PAC_sequences_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(1))
         # tasks['PAC_sequences'] = np.append(tasks['PAC_sequences'],'PAC_sequences_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.mat'.format(2))
 
@@ -80,6 +84,8 @@ for row in df_participants.iterrows():
         
         tasks['ERP_npy_file'] = np.append(tasks['ERP_npy_file'],'ERP_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
         
+        tasks['ERP_npy_file_with_normalization_and_baseline_correction'] = np.append(tasks['ERP_npy_file_with_normalization_and_baseline_correction'],'ERP_base_correct_normalization_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
+        
         tasks['ERP_nobaseline_npy_file'] = np.append(tasks['ERP_nobaseline_npy_file'],'ERP_nb_correct_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
 
         tasks['PAC_sequences_v1'] = np.append(tasks['PAC_sequences_v1'],'PAC_sequence_selected_ch_' + row[1].participant_id + '_ses-{0:0>2}_task-Rest_eeg.npy'.format(1))
@@ -92,7 +98,7 @@ for row in df_participants.iterrows():
             
 
 task_df = pd.DataFrame(tasks)
-task_df.to_csv('.\\task_track_files\\task_track_file_pac_sequences_ch.csv')
+task_df.to_csv('./task_track_files/task_track_file_matlab.csv')
 
 
 
