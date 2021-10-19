@@ -2,8 +2,12 @@
 
 clear
 %eeglab
+addpath(genpath('/usr/local/MATLAB/R2017a/toolbox/eeglab2021.0/functions'))
+addpath(genpath('/usr/local/MATLAB/R2017a/toolbox/eeglab2021.0/plugins/firfilt'))
+addpath(genpath('/usr/local/MATLAB/R2017a/toolbox/eeglab2021.0/plugins/clean_rawdata'))
+%addpath('/usr/local/MATLAB/R2017a/toolbox/eeglab2021.0/functions/guifunc')
 
-T = readtable('..\task_track_files\task_track_file_matlab.csv','Format','%d%s%s%s%s%s%s%s%s%s');
+T = readtable('../task_track_files/task_track_file_matlab.csv','Format','%d%s%s%s%s%s%s%s%s%s');
 
 Path = {'/home/kiani/DS/ds003490-download'};
 files_preprocessed = fullfile(Path,T{:,2},T{:,4});
@@ -32,7 +36,7 @@ channellocationfile = channellocationfile{1};
 a=T{:,2};
 b=T{:,3};
 c=T{:,4};
-parfor k=1:size(task_not_completed, 2)
+for k=1:size(task_not_completed, 2)
     i = task_not_completed(k);
     load_path = fullfile(Path, a{i}); %sprintf('%s/%s',Path,a{i});
     EEG = pop_loadset(b{i},load_path);

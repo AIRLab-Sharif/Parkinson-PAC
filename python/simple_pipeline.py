@@ -10,9 +10,9 @@ import pac
 
 
 
-suffix = '_time_PAC4'#'_1ch_nv'
-gamma = [20, 80]
-beta  = [ 4, 16]
+suffix = '_1_50'#'_1ch_nv'
+gamma = [10, 80]
+beta  = [ 1, 16]
 
 
 def create_elc_file(task):
@@ -170,7 +170,7 @@ def analyse_sub(task):
     raw = mne.io.read_raw_eeglab(os.path.join(task['dir'], 'pre_' + task['file_formatter'].format('eeg.set')),
                                  preload=True, verbose=0)
     # raw.drop_channels(['X', 'Y', 'Z'])
-    raw.drop_channels(['VEOG'])
+    # raw.drop_channels(['VEOG'])
     # raw.set_eeg_reference()
 
     for ch in raw._data:
@@ -208,10 +208,10 @@ def analyse_sub(task):
         epochs_data[ev] = epochs[ev]._data
 
         
-    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'epochs')),
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'epochs{suffix}')),
                         **epochs_data)
     
-    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'erps')),
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'erps{suffix}')),
                         **erps)
     
 #     return
