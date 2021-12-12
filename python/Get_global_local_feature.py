@@ -16,8 +16,12 @@ def conv_PAC_dist(PAC_dist,h=5,w=5,down_sample_factor_h=5,down_sample_factor_w=5
     PAC_feature = ss.convolve2d(PAC_dist,kernel_filter,mode=filter_mode)
 
     # Sampling
-    height_index = np.linspace(0,PAC_feature.shape[0]-1,PAC_dist.shape[0]//down_sample_factor_h).astype(np.int32)
-    width_index = np.linspace(0,PAC_feature.shape[1]-1,PAC_dist.shape[1]//down_sample_factor_w).astype(np.int32)
+    H = PAC_dist.shape[0]//down_sample_factor_h
+    Num_H_samples = (H-1)*down_sample_factor_h
+    W = PAC_dist.shape[1]//down_sample_factor_w
+    Num_W_samples = (W-1)*down_sample_factor_w
+    height_index = np.linspace(0,Num_H_samples,H).astype(np.int32)
+    width_index = np.linspace(0,Num_W_samples,W).astype(np.int32)
     w,h = np.meshgrid(width_index,height_index)
 
     return PAC_feature[h,w]

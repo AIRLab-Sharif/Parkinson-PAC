@@ -185,6 +185,7 @@ octave-workspace
 *.fdt
 *.fif
 *.mat
+*.mmap
 ds
 
 # outputs
