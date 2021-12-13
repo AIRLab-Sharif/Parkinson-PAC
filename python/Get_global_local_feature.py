@@ -17,6 +17,6 @@ def conv_PAC_dist(PAC_dist,h=5,w=5,down_sample_factor_h=5,down_sample_factor_w=5
 
     # Sampling
     height_index = np.linspace(0,PAC_feature.shape[0]-1,PAC_dist.shape[0]//down_sample_factor_h).astype(np.int32)
-    width_index = np.linspace(0,PAC_feature.shape[0]-1,PAC_dist.shape[1]//down_sample_factor_w).astype(np.int32)
+    width_index = np.linspace(0,PAC_feature.shape[1]-1,PAC_dist.shape[1]//down_sample_factor_w).astype(np.int32)
     h,w = np.meshgrid(height_index,width_index)
     return PAC_feature[h,w]

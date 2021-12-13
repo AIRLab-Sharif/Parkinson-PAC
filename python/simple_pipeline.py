@@ -10,9 +10,9 @@ import pac
 
 
 
-suffix = '_1_50'#'_1ch_nv'
-gamma = [10, 80]
-beta  = [ 1, 16]
+suffix = '_1_200'#'_1ch_nv'
+gamma = [ 1, 200]
+beta  = [ 1, 50]
 
 
 def create_elc_file(task):
@@ -121,6 +121,7 @@ def analyse_erps(erps: dict, task=None):
 
         mvl = np.zeros((erp.info['nchan'], erp.info['nchan'],))
         tfds = {}
+        tfds_time = {}
 
         erp_df = erp.to_data_frame()
         erp_df.time = list(range(-200, 1000 + 1, 2))
@@ -132,6 +133,15 @@ def analyse_erps(erps: dict, task=None):
         for ch in erp_df:
             tfd = pac.rid_rihaczek(erp_df[ch], int(erp.info['sfreq']))
             tfds[ch] = tfd
+            
+            tfd_time = []
+        
+            for i, ts in enumerate(zip(steps[:-1], steps[1:])):
+                tstart, tend = ts
+                ind_start = np.where(erp_df.index == tstart)[0][0]
+                ind_end   = np.where(erp_df.index == tend)[0][0]
+                tfd_time.append(pac.rid_rihaczek(erp_df[ch][ind_start:ind_end], int(erp.info['sfreq'])))
+            tfds_time[ch] = tfd_time
 
         for chx, chxname in enumerate(erp_df):
             chy = chx
@@ -141,8 +151,9 @@ def analyse_erps(erps: dict, task=None):
                 tstart, tend = ts
                 ind_start = np.where(erp_df.index == tstart)[0][0]
                 ind_end   = np.where(erp_df.index == tend)[0][0]
-                mvl_2d_time[chx, :, :, i] = pac.tfMVL_tfd2_2d_time(
-                    tfds[chxname], tfds[chxname], gamma, beta, ind_start, ind_end)
+                mvl_2d_time[chx, :, :, i] = pac.tfMVL_tfd2_2d(tfds_time[chxname][i], tfds_time[chyname][i], gamma, beta)
+#                 mvl_2d_time[chx, :, :, i] = pac.tfMVL_tfd2_2d_time(
+#                     tfds[chxname], tfds[chxname], gamma, beta, ind_start, ind_end)
 
 
             for chy, chyname in enumerate(erp_df):
