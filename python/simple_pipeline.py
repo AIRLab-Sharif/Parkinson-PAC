@@ -9,10 +9,9 @@ import pandas as pd
 import pac
 
 
-
-suffix = '_1_200'#'_1ch_nv'
-gamma = [ 1, 200]
-beta  = [ 1, 50]
+suffix = '_1_200'  # '_1ch_nv'
+gamma = [1, 200]
+beta = [1, 50]
 
 
 def create_elc_file(task):
@@ -61,7 +60,8 @@ def create_tasks_df(ds_path=None):
             participant_tasks['pd_drug_type'] = pd_drug_type
             participant_tasks['isMale'] = participant['sex'] == 'Male'
             participant_tasks['age'] = participant['age']
-            participant_tasks['dir'] = os.path.join(ds_path, participant['participant_id'], f'ses-{sess:02}', 'eeg', )
+            participant_tasks['dir'] = os.path.join(
+                ds_path, participant['participant_id'], f'ses-{sess:02}', 'eeg', )
             participant_tasks[
                 'file'] = f'{participant["participant_id"]}_ses-{sess:02}_eeg_{participant["participant_id"]}_ses-{sess:02}_task-Rest_eeg.mat'
             participant_tasks['file_formatter'] = f'{participant["participant_id"]}_ses-{sess:02}_task-Rest_{{}}'
@@ -76,7 +76,8 @@ def create_tasks_df(ds_path=None):
 
 
 def check_completed(task, event=None) -> bool:
-    json_path = os.path.join(task['dir'], task['file_formatter'].format(f'completed{suffix}.json'))
+    json_path = os.path.join(
+        task['dir'], task['file_formatter'].format(f'completed{suffix}.json'))
     completed = {}
     if os.path.exists(json_path):
         with open(json_path) as f:
@@ -89,7 +90,8 @@ def check_completed(task, event=None) -> bool:
 
 
 def update_completed(task, event=None) -> bool:
-    json_path = os.path.join(task['dir'], task['file_formatter'].format(f'completed{suffix}.json'))
+    json_path = os.path.join(
+        task['dir'], task['file_formatter'].format(f'completed{suffix}.json'))
     completed = {}
     if os.path.exists(json_path):
         with open(json_path) as f:
@@ -117,7 +119,7 @@ def analyse_erps(erps: dict, task=None):
         mvl_2d = np.zeros(
             (erp.info['nchan'], erp.info['nchan'], gamma[1] - gamma[0] + 1, beta[1] - beta[0] + 1))
         mvl_2d_time = np.zeros((erp.info['nchan'], gamma[1] - gamma[0] + 1,
-                                beta[1] - beta[0] + 1, len(steps) - 1 ))
+                                beta[1] - beta[0] + 1, len(steps) - 1))
 
         mvl = np.zeros((erp.info['nchan'], erp.info['nchan'],))
         tfds = {}
@@ -128,19 +130,21 @@ def analyse_erps(erps: dict, task=None):
         erp_df = erp_df.set_index('time')
 
         if task is not None:
-            print(f'{task.participant_id} {groups[task.pd_drug_type]:10} {event_type} tfd started')
+            print(
+                f'{task.participant_id} {groups[task.pd_drug_type]:10} {event_type} tfd started')
 
         for ch in erp_df:
             tfd = pac.rid_rihaczek(erp_df[ch], int(erp.info['sfreq']))
             tfds[ch] = tfd
-            
+
             tfd_time = []
-        
+
             for i, ts in enumerate(zip(steps[:-1], steps[1:])):
                 tstart, tend = ts
                 ind_start = np.where(erp_df.index == tstart)[0][0]
-                ind_end   = np.where(erp_df.index == tend)[0][0]
-                tfd_time.append(pac.rid_rihaczek(erp_df[ch][ind_start:ind_end], int(erp.info['sfreq'])))
+                ind_end = np.where(erp_df.index == tend)[0][0]
+                tfd_time.append(pac.rid_rihaczek(
+                    erp_df[ch][ind_start:ind_end], int(erp.info['sfreq'])))
             tfds_time[ch] = tfd_time
 
         for chx, chxname in enumerate(erp_df):
@@ -150,11 +154,11 @@ def analyse_erps(erps: dict, task=None):
             for i, ts in enumerate(zip(steps[:-1], steps[1:])):
                 tstart, tend = ts
                 ind_start = np.where(erp_df.index == tstart)[0][0]
-                ind_end   = np.where(erp_df.index == tend)[0][0]
-                mvl_2d_time[chx, :, :, i] = pac.tfMVL_tfd2_2d(tfds_time[chxname][i], tfds_time[chyname][i], gamma, beta)
+                ind_end = np.where(erp_df.index == tend)[0][0]
+                mvl_2d_time[chx, :, :, i] = pac.tfMVL_tfd2_2d(
+                    tfds_time[chxname][i], tfds_time[chyname][i], gamma, beta)
 #                 mvl_2d_time[chx, :, :, i] = pac.tfMVL_tfd2_2d_time(
 #                     tfds[chxname], tfds[chxname], gamma, beta, ind_start, ind_end)
-
 
             for chy, chyname in enumerate(erp_df):
                 # todo:
@@ -201,14 +205,14 @@ def analyse_sub(task):
     # freqs = (60, 120, 180, 240)
     # raw_notch = raw.copy().notch_filter(freqs=freqs, picks=eeg_picks, verbose=0)
     # raw_filtered = raw_notch.copy().filter(l_freq=1, h_freq=150, verbose=0)
-    
+
     events, event_dict = mne.events_from_annotations(raw, verbose=0)
 
     selected_events = ['S200', 'S201', 'S202']
-    event_types = {'S200': 'Target', 'S201': 'Standard', 'S202':'Novelty'}
-    kwargs = {'S200': {'baseline': (0.250, 0.450), 'tmin': 0.250, 'tmax':1.450},
-              'S201': {'baseline': (0.250, 0.450), 'tmin': 0.250, 'tmax':1.450},
-              'S202': {'baseline': (-.200,     0), 'tmin': -.200, 'tmax':1.000},}
+    event_types = {'S200': 'Target', 'S201': 'Standard', 'S202': 'Novelty'}
+    kwargs = {'S200': {'baseline': (0.250, 0.450), 'tmin': 0.250, 'tmax': 1.450},
+              'S201': {'baseline': (0.250, 0.450), 'tmin': 0.250, 'tmax': 1.450},
+              'S202': {'baseline': (-.200,     0), 'tmin': -.200, 'tmax': 1.000}, }
 
     erps = {}
     epochs_data = {}
@@ -218,13 +222,12 @@ def analyse_sub(task):
         erps[ev] = epochs[ev].average()
         epochs_data[ev] = epochs[ev]._data
 
-        
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'epochs{suffix}')),
                         **epochs_data)
-    
+
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'erps{suffix}')),
                         **erps)
-    
+
 #     return
 
     mvls, mvl_2ds, mvl_2d_times = analyse_erps(erps, task)
@@ -236,8 +239,8 @@ def analyse_sub(task):
                         **mvl_2d_times)
     update_completed(task)
     print(f'{task.participant_id} completed')
-    
-    
+
+
 if __name__ == '__main__':
     tasks_df = create_tasks_df()
 

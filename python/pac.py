@@ -1,4 +1,3 @@
-# %%
 import math
 from mne import parallel
 import numpy as np
@@ -141,6 +140,27 @@ def _calc_MVL(phase: np.ndarray, amp: np.ndarray):
     MVL = abs(z.mean())
 
     return MVL
+def _calc_MI(phase: np.ndarray, amp: np.ndarray,bin_num):
+    assert phase.shape[0] == amp.shape[0]
+    P_dist = np.zeros(shape=(phase.shape[0],))
+    index_bin = np.linspace(-np.pi,np.pi*(1-2/bin_num),bin_num)
+    index_bin_1 = np.array([index_bin])
+    index_bin_matrix = np.repeat(index_bin_1,phase.shape[0],axis=0)
+    phase = np.expand_dims(phase,axis=1)
+    temp =(phase-index_bin_matrix>0)*(phase-index_bin_matrix<=np.pi*2/bin_num)
+    temp = np.where(temp == 1)[1]*np.pi*2/bin_num
+    temp = np.expand_dims(temp,axis=0)
+    d = np.repeat(temp,index_bin.shape[0],axis=0)
+    h = np.expand_dims(index_bin,axis=1)
+    h=np.repeat(h,phase.shape[0],axis=1)
+    flag = (h==d)
+    amp = [amp]
+    amp = np.repeat(amp,index_bin.shape[0],axis=0)
+    out = np.sum(amp*flag,axis=1)/(np.sum(flag,axis=1)+1)   
+    P_dist = out/np.sum(out)
+    MI = -np.sum(P_dist[P_dist>0] * np.log(P_dist[P_dist>0])/np.log(2))
+    return MI
+
 
 
 def tfMVL_tfd_2d(tfd, high_freq, low_freq):
@@ -372,6 +392,42 @@ def tfMVL(x, high_freq, low_freq, Fs):
 
     return tf_canolty
 
+def tfMI(x, high_freq, low_freq, Fs):
+    '''
+    This is python implementation of tfMVL function
+    which was implemented in MATLAB by Munia in this repository
+    https://github.com/muntam/TF-PAC
+
+    The repository was implemented for
+    Munia, T.T.K., Aviyente, S. Time-Frequency Based Phase-Amplitude
+    Coupling Measure For Neuronal Oscillations. Sci Rep 9, 12441 (2019).
+    https://doi.org/10.1038/s41598-019-48870-2
+
+    This function computes the phase amplitude coupling using TF-MVL method.
+
+    Parameter:
+        x            : input signal 
+        high_freq    : Amplitude Frequency range 
+        low_freq     : Phase Frequency range 
+        Fs           : Sampling Frequency  
+
+    Returns:
+        tf_canolty   : Computed PAC using TF-MVL method
+
+    Written by: Mahdi Kiani, March 2021
+    '''
+
+    # Amplitude and Phase calculation
+    tfd = rid_rihaczek(x, Fs)
+    Amp = abs(sum(tfd[high_freq[0]:high_freq[1]+1, :]))
+    tfd_low = sum(tfd[low_freq[0]:low_freq[1]+1, :])
+    angle_low = np.angle(tfd_low)
+    Phase = angle_low
+
+    tf_canolty = _calc_MI(Phase, Amp,20)
+
+    return tf_canolty    
+
 
 def tfMVL2(x, high_freq, y, low_freq, Fs):
     '''
@@ -428,7 +484,8 @@ def main():
 
     tfd = rid_rihaczek(x, 500)
 
-    tfMVL(x, high_freq, low_freq, 500)
+    print(tfMVL(x, high_freq, low_freq, 500))
+    print(tfMI(x,high_freq, low_freq, 500))
 
     plt.plot(x)
 
