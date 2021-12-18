@@ -141,6 +141,7 @@ def analyse_erps(erps: dict, task=None):
 
             for i, ts in enumerate(zip(steps[:-1], steps[1:])):
                 tstart, tend = ts
+                # print(tstart, tend)
                 ind_start = np.where(erp_df.index == tstart)[0][0]
                 ind_end = np.where(erp_df.index == tend)[0][0]
                 tfd_time.append(pac.rid_rihaczek(
@@ -157,8 +158,8 @@ def analyse_erps(erps: dict, task=None):
                 ind_end = np.where(erp_df.index == tend)[0][0]
                 mvl_2d_time[chx, :, :, i] = pac.tfMVL_tfd2_2d(
                     tfds_time[chxname][i], tfds_time[chyname][i], gamma, beta)
-#                 mvl_2d_time[chx, :, :, i] = pac.tfMVL_tfd2_2d_time(
-#                     tfds[chxname], tfds[chxname], gamma, beta, ind_start, ind_end)
+                # mvl_2d_time[chx, :, :, i] = pac.tfMVL_tfd2_2d_time(
+                #     tfds[chxname], tfds[chxname], gamma, beta, ind_start, ind_end)
 
             for chy, chyname in enumerate(erp_df):
                 # todo:
@@ -228,7 +229,7 @@ def analyse_sub(task):
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'erps{suffix}')),
                         **erps)
 
-#     return
+    # return
 
     mvls, mvl_2ds, mvl_2d_times = analyse_erps(erps, task)
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvls{suffix}')),
