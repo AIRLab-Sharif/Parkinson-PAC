@@ -9,7 +9,7 @@ import pandas as pd
 import pac
 
 
-suffix = '_1_200'  # '_1ch_nv'
+suffix = '_1_200_double'  # '_1ch_nv'
 gamma = [1, 200]
 beta = [1, 50]
 
@@ -183,7 +183,7 @@ def analyse_sub(task):
     if (check_completed(task)):
         return
 
-    raw = mne.io.read_raw_eeglab(os.path.join(task['dir'], 'pre_' + task['file_formatter'].format('eeg.set')),
+    raw = mne.io.read_raw_eeglab(os.path.join(task['dir'], 'pre_' + task['file_formatter'].format('eeg_double.set')),
                                  preload=True, verbose=0)
     # raw.drop_channels(['X', 'Y', 'Z'])
     # raw.drop_channels(['VEOG'])
