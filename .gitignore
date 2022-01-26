@@ -179,6 +179,7 @@ octave-workspace
 .idea
 
 ## data
+data/
 *.npy
 *.npz
 *.set
@@ -186,6 +187,7 @@ octave-workspace
 *.fif
 *.mat
 *.mmap
+*.pkl
 ds
 
 # outputs
