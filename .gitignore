@@ -179,6 +179,7 @@ octave-workspace
 .idea
 
 ## data
+data/
 *.npy
 *.npz
 *.set
@@ -186,6 +187,7 @@ octave-workspace
 *.fif
 *.mat
 *.mmap
+*.pkl
 ds
 
 # outputs
@@ -205,3 +207,10 @@ plots
 ## config file
 config.json
 .DS_Store
+
+## secrets
+*.json
+client_secrets.json
+credentials.json
+setting.yaml
+mycreds.txt
