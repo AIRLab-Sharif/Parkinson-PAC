@@ -395,7 +395,7 @@ if __name__ == '__main__':
 
     # analyse_sub(tasks_df.iloc[0])
 
-    with Pool(4) as p:
+    with Pool(8) as p:
         p.map(analyse_sub3, df.iloc)
 
     # for task in tasks_df.iloc:
