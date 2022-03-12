@@ -1,3 +1,4 @@
+# In[1]:
 import json
 import os
 import sys
@@ -229,9 +230,11 @@ if __name__ == '__main__':
     # analyse_sub(tasks_df.iloc[0])
 
     from multiprocessing import Pool
-    with Pool(4) as p:
-        p.map(analyse_sub2, tasks_df.iloc)
+    # with Pool(4) as p:
+    #     p.map(analyse_sub2, tasks_df.iloc)
 
     # for task in tasks_df.iloc:
     #     analyse_sub2(task)
     print('finished')
+
+# %%
