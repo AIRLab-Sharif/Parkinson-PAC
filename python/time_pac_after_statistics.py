@@ -250,6 +250,7 @@ def analyse_sub2(task):
 
 def analyse_erps3(erps: dict, task=None):
     global selected_channels
+    mvl_2ds = {}
     mvl_cross_times = {}
 
     steps = list(range(-200, 1000 + 1, 200))
@@ -261,6 +262,10 @@ def analyse_erps3(erps: dict, task=None):
 #     print(erps.items())
 
     for event_type, erp in erps.items():
+        mvl_2d = np.zeros((len(selected_channels), len(selected_channels),
+                           gamma[1] - gamma[0] + 1, beta[1] - beta[0] + 1))
+        tfds = {}
+
         mvl_cross_time = np.zeros((len(selected_channels), len(selected_channels),
                                    gamma[1] - gamma[0] + 1,
                                    beta[1] - beta[0] + 1, len(steps) - 1))
@@ -277,6 +282,9 @@ def analyse_erps3(erps: dict, task=None):
                 f'{task.participant_id} {groups[task.pd_drug_type]:10} {event_type} tfd started')
 
         for ch in selected_channels:  # todo
+            tfd = pac.rid_rihaczek(erp_df[ch], int(erp.info['sfreq']))
+            tfds[ch] = tfd
+
             tfd_time = []
 
             for i, ts in enumerate(zip(steps[:-1], steps[1:])):
@@ -294,6 +302,8 @@ def analyse_erps3(erps: dict, task=None):
 
         for chx, chxname in enumerate(selected_channels):
             for chy, chyname in enumerate(selected_channels):
+                mvl_2d[chx, chy] = pac.tfMVL_tfd2_2d(
+                    tfds[chxname], tfds[chyname], gamma, beta)
                 for i, ts in enumerate(zip(steps[:-1], steps[1:])):
                     tstart, tend = ts
                     ind_start = np.where(erp_df.index == tstart)[0][0]
@@ -301,9 +311,10 @@ def analyse_erps3(erps: dict, task=None):
                     mvl_cross_time[chx, chy, :, :, i] = pac.tfMVL_tfd2_2d(
                         tfds_time[chxname][i], tfds_time[chyname][i], gamma, beta)
 
+        mvl_2ds[event_type] = mvl_2d
         mvl_cross_times[event_type] = mvl_cross_time
 
-    return mvl_cross_times
+    return mvl_2ds, mvl_cross_times
 
 
 def analyse_sub3(task):
@@ -359,7 +370,15 @@ def analyse_sub3(task):
         erps[f'{ev}_o'] = out_epochs[ev].average()
         epochs_data[f'{ev}_o'] = out_epochs[ev]._data
 
-    mvl_cross_times = analyse_erps3(erps, task)
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'epochs{suffix}')),
+                        **epochs_data)
+
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'erps{suffix}')),
+                        **erps)
+
+    mvl_2ds, mvl_cross_times = analyse_erps3(erps, task)
+    np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvl_2ds{suffix}')),
+                        **mvl_2ds)
     np.savez_compressed(os.path.join(task['dir'], task['file_formatter'].format(f'mvl_cross_times{suffix}')),
                         **mvl_cross_times)
     update_completed(task)
