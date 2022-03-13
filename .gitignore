@@ -187,14 +187,10 @@ data/
 *.fif
 *.mat
 *.mmap
-xa*
 *.pkl
 data/*
 
 ds
-
-# outputs
-outputs
 reports
 reports.txt
 plots
