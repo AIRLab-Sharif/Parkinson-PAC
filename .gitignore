@@ -188,10 +188,9 @@ data/
 *.mat
 *.mmap
 *.pkl
-ds
+data/*
 
-# outputs
-outputs
+ds
 reports
 reports.txt
 plots
