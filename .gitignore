@@ -186,6 +186,10 @@ octave-workspace
 *.fif
 *.mat
 *.mmap
+xa*
+*.pkl
+data/*
+
 ds
 
 # outputs
