@@ -331,13 +331,12 @@ def analyse_sub3(task):
     #
     events, event_dict = mne.events_from_annotations(raw, verbose=0)
 
-    rev_d = {}
-    for k, v in event_dict.items():
-        rev_d[v] = k
-
-    in_selection = np.array(list(
-        map(lambda ev: rev_d[ev] in selected_events, events[:, 2])))
-    conv_sub_stims = np.zeros((3, sum(in_selection) - N + 1))
+    rev_d = {v: k for k, v in event_dict.items()}
+    
+    in_selection = np.array([ (rev_d[ev] in selected_events) for ev in events[:, 2] ])
+    
+    conv_sub_stims = np.zeros(
+        (len(selected_events), sum(in_selection) - N + 1))
     selection = np.ones((conv_sub_stims.shape[1], ), dtype=np.bool)
     for k, ev in enumerate(selected_events):
         conv_sub_stims[k] = np.convolve(
@@ -363,7 +362,7 @@ def analyse_sub3(task):
         in_epochs = mne.Epochs(raw, in_std_ev[in_std_ev[:, 2] == event_dict[ev]],
                                event_id={ev: event_dict[ev]}, preload=True, verbose=0, **(kwargs[ev]))
         erps[f'{ev}_i'] = in_epochs[ev].average()
-        epochs_data[f'{ev}_i'] = in_epochs[ev]._data * 1e-6
+        epochs_data[f'{ev}_i'] = in_epochs[ev]._data
 
         out_epochs = mne.Epochs(raw, out_std_ev[out_std_ev[:, 2] == event_dict[ev]],
                                 event_id={ev: event_dict[ev]}, preload=True, verbose=0, **(kwargs[ev]))
@@ -395,8 +394,8 @@ if __name__ == '__main__':
 
     # analyse_sub(tasks_df.iloc[0])
 
-    with Pool(8) as p:
-        p.map(analyse_sub3, df.iloc)
+    # with Pool(8) as p:
+    #     p.map(analyse_sub3, df.iloc)
 
     # for task in tasks_df.iloc:
     #     analyse_sub2(task)
