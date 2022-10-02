@@ -14,15 +14,22 @@ import warnings
 warnings.simplefilter("ignore", RuntimeWarning)
 
 BASE_DIR = os.path.abspath('')
-suffix = '_33_36_double_2run'
+suffix = '_33_36_double_2run_cz'
 selected_events = ['S200', 'S201', 'S202']
-selected_channels = ['F3', 'F4', 'FC3', 'FC4', 'Fz', 'Pz']
+selected_channels = ['F3', 'F4', 'FC3', 'FC4', 'Fz', 'Pz', 'Cz']
 
 selected_channels_pairs = [
     ('Fz', 'FC3'), ('Fz', 'FC4'),
     ('Pz', 'FC3'), ('Pz', 'FC4'),
+    ('Cz', 'FC3'), ('Cz', 'FC4'),
+
     ('Fz', 'F3'), ('Fz', 'F4'),
     ('Pz', 'F3'), ('Pz', 'F4'),
+    ('Cz', 'F3'), ('Cz', 'F4'),
+
+    ('Cz', 'Fz'), ('Cz', 'Pz'),
+    ('Pz', 'Cz'), ('Fz', 'Cz'),
+    ('Pz', 'Fz'), ('Fz', 'Pz'),
 ]
 
 gamma = [33, 36]
@@ -337,7 +344,7 @@ def analyse_sub3(task):
     in_selection = np.array([(rev_d[ev] in selected_events)
                             for ev in events[:, 2]])
 
-    selection = np.ones((sum(in_selection), ), dtype=np.bool)
+    selection = np.ones((sum(in_selection), ), dtype=bool)
 
     sel_events = events[in_selection]
     ind = np.diff(sel_events[:, 0]).argmax()
